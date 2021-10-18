@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css">
+        {% load static %}
+        <link href="{% static 'index.css'%}" rel="stylesheet" type="text/css" media="all" />  
+        <script type="text/javascript" src="{% static 'index.js'%}"></script>
+        
+    </head>
+    <!--Coded With Love By Mutiullah Samim-->
+    <body>
+        <div class="wbar">
+            <span>Welcome {{user.first_name}} {{user.last_name}} |
+            <a href="signout"><img src={% static 'logout.png'%} class="user_img"></img></a></span>  
+        </div>
+        <div class="container-fluid h-100">
+            <div class="row justify-content-center h-100">
+                <div class="col-md-4 col-xl-3 chat" id="phone"><div class="card mb-sm-3 mb-md-0 contacts_card">
+                    <div class="card-header">
+                        <div class="input-group">
+
+
+
+                            <!-- Search Bar        >>>>>>>>>>>>>>>> -->
+                            <input type="text" placeholder="Search..." name="" class="form-control search" onkeyup="searchFriend()" id="searchbar">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text search_btn"><i class="fas fa-search"></i></span>
+                            </div>
+                        </div>
+                        <div class="flist">
+                        <ul id="frndlist">
+
+                        </ul></div>
+                    </div>
+                    <div class="card-body contacts_body">
+                        <ui class="contacts" id="fl">
+
+                           
+                            <!-- Friends List       >>>>>>>>>>>>>>>>>-->
+
+                        
+                        </ui>
+                    </div>
+
+
+
+                    <div class="card-footer"></div>
+                </div></div>
+                <div class="col-md-8 col-xl-6 chat" id="phone">
+                    <div class="card">
+                        <div class="card-header msg_head">
+                            <div class="d-flex bd-highlight">
+                                <div class="img_cont">
+                                    <img src={% static 'profile.png'%} class="rounded-circle user_img">
+                                    <span class="online_icon"></span>
+                                </div>
+                                <div class="user_info">
+                                    <span class="chatname"></span>
+                                    <p class="online_status"></p>
+                                </div>
+                                <div class="video_cam">
+                                    <span><i class="fas fa-video"></i></span>
+                                    <span><i class="fas fa-phone"></i></span>
+                                </div>
+                            </div>
+                            <span id="action_menu_btn"><i class="fas fa-ellipsis-v"></i></span>
+                            <div class="action_menu">
+                                <ul>
+                                    <li><i class="fas fa-user-circle"></i> View profile</li>
+                                    <li><i class="fas fa-users"></i> Add to close friends</li>
+                                    <li><i class="fas fa-plus"></i> Add to group</li>
+                                    <li><i class="fas fa-ban"></i> Block</li>
+                                </ul>
+                            </div>
+                        </div>
+
+
+
+                        <!-- Message Main BOX ............ -->
+                        <div class="card-body msg_card_body" id="chatbox">
+                
+                        </div>
+
+
+
+                        
+
+                        <div class="card-footer">
+                            <div class="input-group">
+                                <div class="input-group-append">
+                                    <span class="input-group-text attach_btn"><i class="fas fa-paperclip"></i></span>
+                                </div>
+                                <textarea  id= "txt" name="" class="form-control type_msg" placeholder="Type your message..." onkeyup="checkEnter()"></textarea>
+                                <div class="input-group-append" onclick="send()">
+                                    <span class="input-group-text send_btn"><i class="fas fa-location-arrow"> Send</i></span>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+
+
+sender = "{{user}}";
+var maindata;
+const l =`<li id="+" onclick="addFriend('+')">+</li>`;
+const fl =`<li id ="+" class ="isactive +" onclick="chatclicked('+')">`+`<div class="d-flex bd-highlight">`+`<div class="img_cont">`+`<img src={% static 'profile.png'%} class="rounded-circle user_img">`+`<span class="online_icon"></span></div>`+`<div class="user_info"><span>+</span>`+`<p>+   is online</p></div></div></li>`
+
+function searchFriend(){
+    $("#frndlist").empty();
+    var txt = document.getElementById("searchbar").value;
+    $.get('/frnd/' + txt, function (data) {
+        maindata = data
+        for(var i =0;i<data.length;i++){
+            var u = data[i].username
+            if("{{user}}"!=u){
+            var box = l.replace(/\+/g,u);
+            $("#frndlist").append(box)
+        }}
+
+    })
+
+}
+
+function addFriend(p){
+    for(var i =0;i<=maindata.length;i++){
+        if(p==maindata[i].username){
+            var x = maindata[i].friends;
+            if(x.includes(sender)){
+                chatclicked(p);
+                $("#frndlist").empty()
+                document.getElementById("searchbar").value="";
+            }
+            else{
+                var dic=JSON.stringify({
+                    "s":sender,
+                    "r":p
+                })
+                $("#frndlist").empty()
+                $.post('/frnd/',dic, function (data) {
+
+            })
+            }
+        }
+    }
+}
+
+
+function friendList(){
+    $.get('/frnd/' + sender, function (data) {
+        var flist =data[0]['friends'];
+        if(flist ==""){
+        }else{
+            $("#fl").empty()
+            flist=flist.split(":")
+            for(var i=0;i<flist.length;i++){
+                var box =fl.replace(/\+/g,flist[i]);
+                $("#fl").append(box)
+
+            }
+        }
+    
+})
+}
+setInterval(function () {
+		friendList()
+	},1000)
+    </script>
+
+    
+</html>

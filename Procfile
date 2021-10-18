@@ -1,0 +1,1 @@
+web: gunicorn talks.wsgi --log-file -
